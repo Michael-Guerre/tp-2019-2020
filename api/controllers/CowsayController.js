@@ -34,7 +34,27 @@ module.exports = {
 
   create: async function(req, res) {
     await Sentences.create({ sentence: req.param('sentence') });
+    var job = queue.create('email', {
+        title: 'wThanks for the text'
+        ,from : "cdad@l3o.eu"
+      , to: req.param('email')
+      , template: 'welcome-email'
+    }).save( function(err){
+      if( !err ) console.log( job.id );
+    });
+    queue.process('email', function(job, done){
+      email(job.data.to, done);
+    });
     return res.redirect('/say');
   },
 };
 
+function email(address, done) {
+  if(!isValidEmail(address)) {
+    return done(new Error('invalid to address'));
+  }
+  let transporter = nodemailer.createTransport(transport[, defaults])
+  let poolConfig = "smtp://postmaster@mailgun.l3o.eu:fedbe91ae5e3529f94528dd311bea4c9-060550c6-d42c872f@smtp.mailgun.org:587"
+
+  done();
+}
